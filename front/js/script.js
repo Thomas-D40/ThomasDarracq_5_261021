@@ -14,7 +14,7 @@ fetch("http://localhost:3000/api/products")
       var kanapTitle = document.createElement("h3");
       var kanapDescription = document.createElement("p");
 
-      kanapLink.href = "./product.html?" + kanaps[i]._id;
+      kanapLink.href = "./product.html?id=" + kanaps[i]._id;
       kanapPicture.src = kanaps[i].imageUrl;
       kanapTitle.innerHTML = kanaps[i].name;
       kanapDescription.innerHTML = kanaps[i].description;

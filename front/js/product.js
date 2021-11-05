@@ -8,6 +8,7 @@ const image = document.getElementsByClassName("item__img")[0];
 const addToCart = document.getElementById("addToCart");
 const quantity = document.getElementById("quantity");
 
+// Récupération de l'ID
 let url = new URL(window.location.href);
 let id = url.searchParams.get("id");
 console.log(id);
@@ -52,6 +53,16 @@ fetch("http://localhost:3000/api/products")
 
 var productArray = [];
 
+//Methodes Traitement Information Storage
+Storage.prototype.setObj = function (key, value) {
+  this.setItem(key, JSON.stringify(value));
+};
+
+Storage.prototype.getObj = function (key) {
+  var value = this.getItem(key);
+  return value && JSON.parse(value);
+};
+
 //Ajout au panier
 
 addToCart.addEventListener("click", function (e) {
@@ -64,69 +75,53 @@ addToCart.addEventListener("click", function (e) {
   }
   console.log("Item added ");
 
+  //Mise en place variable pour comparaison avec articles déjà présents
+
+  var color = colors.options[colors.selectedIndex].text;
+  var qte = quantity.value;
+
+  // Vérification si article déjà présent
+
   var productJSON = {
-    name: title.innerHTML,
-    color: colors.options[colors.selectedIndex].text,
-    quantity: quantity.value,
+    id: id,
+    color: color,
+    quantity: qte,
   };
-  console.log(productJSON);
-  console.log(productJSON.color);
 
   ///////////////// STORAGE
 
-  if (localStorage.getObj("product") !== null) {
-    //// Recherche produit identique
+  // Fonction générique pour push
 
-    // if (
-    //   productArray.indexOf(productJSON.color) !== -1 &&
-    //   productArray.indexOf(productJSON.name) !== -1
-    // ) {
-    //   productArray = localStorage.getObj("product");
-    //   productArray.push(productJSON.quantity);
-    //   localStorage.setObj("product", productArray);
-    // } else {
-    productArray = localStorage.getObj("product");
-    productArray.push(productJSON);
-    localStorage.setObj("product", productArray);
+  //Vérif existance du local storage
+  if (localStorage.getObj("products") !== null) {
+    productArray = localStorage.getObj("products");
+
+    // Création d'une variable permettant de vérifier si l'item est déjà présent
+
+    let isNew = true;
+    productArray.forEach(function (v) {
+      if (v.id == id && v.color == color) {
+        isNew = false;
+        console.log(typeof qte);
+        let qteCart = parseInt(v.quantity, 10);
+        let qteAdded = parseInt(qte, 10);
+        console.log(qteCart);
+        qteCart += qteAdded;
+        console.log(qteCart);
+      }
+    });
+    console.log(isNew);
+
+    if (isNew == true) {
+      productArray.push(productJSON);
+    }
+    localStorage.setObj("products", productArray);
   } else {
     productArray.push(productJSON);
-    localStorage.setObj("product", productArray);
+    localStorage.setObj("products", productArray);
   }
+
   console.log(productArray);
+  console.log(productArray[0].id);
 });
-
-Storage.prototype.setObj = function (key, value) {
-  this.setItem(key, JSON.stringify(value));
-};
-
-Storage.prototype.getObj = function (key) {
-  var value = this.getItem(key);
-  return value && JSON.parse(value);
-};
-
-// Vérification doublon objet
-
-//All values stored in localStorage are strings.
-//Grab our itemsline string from localStorage.
-var stringFromLocalStorage = window.localStorage.getItem("itemsline");
-
-//Then parse that string into an actual value.
-var parsedValueFromString = JSON.parse(stringFromLocalStorage);
-
-//If that value is null (meaning that we've never saved anything to that spot in localStorage before), use an empty array as our array. Otherwise, just stick with the value we've just parsed out.
-var array = parsedValueFromString || [];
-
-//Here's the value we want to add
-var value = "some value";
-
-//If our parsed/empty array doesn't already have this value in it...
-if (array.indexOf(value) == -1) {
-  //add the value to the array
-  array.push(value);
-
-  //turn the array WITH THE NEW VALUE IN IT into a string to prepare it to be stored in localStorage
-  var stringRepresentingArray = JSON.stringify(array);
-
-  //and store it in localStorage as "itemsline"
-  window.localStorage.setItem("itemsline", stringRepresentingArray);
-}
+// Fusion doublon

@@ -1,9 +1,13 @@
+// Variable pour mise en place des éléments sur la page
+
 const title = document.getElementById("title");
 const price = document.getElementById("price");
 const description = document.getElementById("description");
 const colors = document.getElementById("colors");
 
 const image = document.getElementsByClassName("item__img")[0];
+
+// Variable pour la gestion du panier
 
 const addToCart = document.getElementById("addToCart");
 const quantity = document.getElementById("quantity");
@@ -80,8 +84,6 @@ addToCart.addEventListener("click", function (e) {
   var color = colors.options[colors.selectedIndex].text;
   var qte = quantity.value;
 
-  // Vérification si article déjà présent
-
   var productJSON = {
     id: id,
     color: color,
@@ -97,31 +99,31 @@ addToCart.addEventListener("click", function (e) {
     productArray = localStorage.getObj("products");
 
     // Création d'une variable permettant de vérifier si l'item est déjà présent
-
     let isNew = true;
     productArray.forEach(function (v) {
+      // Si déjà présent, on passe isNew en faux et on procède au changement de quantité
       if (v.id == id && v.color == color) {
         isNew = false;
+        // Qte et v.quantity étant des strings, on les transforme en nombre pour procéder à l'addition
         console.log(typeof qte);
         let qteCart = parseInt(v.quantity, 10);
         let qteAdded = parseInt(qte, 10);
-        console.log(qteCart);
         qteCart += qteAdded;
-        console.log(qteCart);
+
+        // Réintégration nouvelle donnée dans v.quantity sous la forme de string pour dépôt dans le LocalStorage
+        v.quantity = JSON.stringify(qteCart);
       }
     });
-    console.log(isNew);
 
+    // Si isNew est toujours true, alors on peut procéder à l'ajout de l'article
     if (isNew == true) {
       productArray.push(productJSON);
     }
+
+    // On peut désormais renvoyer les données dans le localstorage
     localStorage.setObj("products", productArray);
   } else {
     productArray.push(productJSON);
     localStorage.setObj("products", productArray);
   }
-
-  console.log(productArray);
-  console.log(productArray[0].id);
 });
-// Fusion doublon

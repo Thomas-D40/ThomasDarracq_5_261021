@@ -6,6 +6,8 @@ fetch("http://localhost:3000/api/products")
       return res.json();
     }
   })
+
+  // Import des informations des articles + injection dans HTML
   .then(function (kanaps) {
     for (var i = 0; i < kanaps.length; i++) {
       var kanapLink = document.createElement("a");

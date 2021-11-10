@@ -4,7 +4,6 @@ const title = document.getElementById("title");
 const price = document.getElementById("price");
 const description = document.getElementById("description");
 const colors = document.getElementById("colors");
-
 const image = document.getElementsByClassName("item__img")[0];
 
 // Variable pour la gestion du panier
@@ -12,19 +11,24 @@ const image = document.getElementsByClassName("item__img")[0];
 const addToCart = document.getElementById("addToCart");
 const quantity = document.getElementById("quantity");
 
+// Création d'une variable pour stocker la source de l'image pour injection dans localStorage
+
+let imgSrc = "";
+
 // Récupération de l'ID
 let url = new URL(window.location.href);
 let id = url.searchParams.get("id");
-console.log(id);
 
 // Affichage produit
 
+//Récupération des données de l'API au format JSON
 fetch("http://localhost:3000/api/products")
   .then(function (res) {
     if (res.ok) {
       return res.json();
     }
   })
+  // Sur la base de l'API, on recherche le produit correspondant à la page pour injecter les informations dans le HTML
   .then(function (kanaps) {
     for (let i = 0; i < kanaps.length; i++) {
       if (kanaps[i]._id == id) {
@@ -47,7 +51,7 @@ fetch("http://localhost:3000/api/products")
 
         var picture = document.createElement("img");
         picture.src = kanaps[i].imageUrl;
-        console.log(picture.src);
+        imgSrc = kanaps[i].imageUrl;
         image.appendChild(picture);
       }
     }
@@ -56,6 +60,7 @@ fetch("http://localhost:3000/api/products")
 // Création du panier
 
 var productArray = [];
+console.log(image.src);
 
 //Methodes Traitement Information Storage
 Storage.prototype.setObj = function (key, value) {
@@ -83,11 +88,17 @@ addToCart.addEventListener("click", function (e) {
 
   var color = colors.options[colors.selectedIndex].text;
   var qte = quantity.value;
+  var prix = price.innerHTML;
+  var total = parseInt(qte, 10) * parseInt(prix, 10);
 
   var productJSON = {
     id: id,
+    nom: title.innerHTML,
     color: color,
+    price: prix,
     quantity: qte,
+    total: total,
+    img: imgSrc,
   };
 
   ///////////////// STORAGE
@@ -110,7 +121,12 @@ addToCart.addEventListener("click", function (e) {
         let qteAdded = parseInt(qte, 10);
         qteCart += qteAdded;
 
-        // Réintégration nouvelle donnée dans v.quantity sous la forme de string pour dépôt dans le LocalStorage
+        //On mets à jour le prix total sur cet article
+        total = qteCart * parseInt(prix, 10);
+        console.log(typeof v.total);
+
+        // Réintégration nouvelle donnée dans v.quantity et v.total sous la forme de string pour dépôt dans le LocalStorage
+        v.total = JSON.stringify(total);
         v.quantity = JSON.stringify(qteCart);
       }
     });

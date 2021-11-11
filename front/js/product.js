@@ -91,7 +91,7 @@ addToCart.addEventListener("click", function (e) {
   var prix = price.innerHTML;
   var total = parseInt(qte, 10) * parseInt(prix, 10);
 
-  var productJSON = {
+  var ProductJSON = {
     id: id,
     nom: title.innerHTML,
     color: color,
@@ -133,13 +133,13 @@ addToCart.addEventListener("click", function (e) {
 
     // Si isNew est toujours true, alors on peut procéder à l'ajout de l'article
     if (isNew == true) {
-      productArray.push(productJSON);
+      productArray.push(ProductJSON);
     }
 
     // On peut désormais renvoyer les données dans le localstorage
     localStorage.setObj("products", productArray);
   } else {
-    productArray.push(productJSON);
+    productArray.push(ProductJSON);
     localStorage.setObj("products", productArray);
   }
 });

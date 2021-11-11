@@ -173,3 +173,26 @@ function suppr(i) {
 for (var i = 0; i < supprBtnArray.length; i++) {
   suppr(i);
 }
+
+// Récupération des éléments du formulaire
+
+const firstName = document.getElementById("firstName");
+const firstNameErrorMsg = document.getElementById("firstNameMsgError");
+
+const lastName = document.getElementById("firstName");
+const lastNameErrorMsg = document.getElementById("firstNameMsgError");
+
+const address = document.getElementById("firstName");
+const addressErrorMsg = document.getElementById("firstNameMsgError");
+
+const city = document.getElementById("firstName");
+const cityErrorMsg = document.getElementById("firstNameMsgError");
+
+const email = document.getElementById("firstName");
+const emailErrorMsg = document.getElementById("firstNameMsgError");
+
+// Règles regex
+
+// Si erreur dans une des rubriques, alors alert
+
+//

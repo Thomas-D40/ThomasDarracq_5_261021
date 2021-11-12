@@ -55,7 +55,8 @@ fetch("http://localhost:3000/api/products")
         image.appendChild(picture);
       }
     }
-  });
+  })
+  .catch((error) => alert("Erreur:" + error));
 
 // Création du panier
 

@@ -177,22 +177,109 @@ for (var i = 0; i < supprBtnArray.length; i++) {
 // Récupération des éléments du formulaire
 
 const firstName = document.getElementById("firstName");
-const firstNameErrorMsg = document.getElementById("firstNameMsgError");
 
-const lastName = document.getElementById("firstName");
-const lastNameErrorMsg = document.getElementById("firstNameMsgError");
+const lastName = document.getElementById("lastName");
 
-const address = document.getElementById("firstName");
-const addressErrorMsg = document.getElementById("firstNameMsgError");
+const address = document.getElementById("address");
 
-const city = document.getElementById("firstName");
-const cityErrorMsg = document.getElementById("firstNameMsgError");
+const city = document.getElementById("city");
 
-const email = document.getElementById("firstName");
-const emailErrorMsg = document.getElementById("firstNameMsgError");
+const email = document.getElementById("email");
+const emailErrorMsg = document.getElementById("emailErrorMsg");
+
+const order = document.getElementById("order");
 
 // Règles regex
 
-// Si erreur dans une des rubriques, alors alert
+let formRegex = /^[\w-]/g;
 
-//
+let formRegexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
+
+// On récupère les inputs du formulaire
+let inputHTMLCollection = document.getElementsByTagName("input");
+
+// On retire les deux derniers qui sont le mail (gestion différente) et le bouton de validation
+let inputArray = Array.from(inputHTMLCollection);
+inputArray.splice(4, 2);
+
+// Si erreur de saisie, on le notifie
+
+function inputListener(j) {
+  inputArray[j].addEventListener("change", () => {
+    console.log(inputArray[j].value);
+    console.log(formRegex.test(inputArray[j].value));
+    if (formRegex.test(inputArray[j].value)) {
+      inputArray[j].nextElementSibling.innerHTML =
+        "Vous ne pouvez utiliser que des lettres";
+      order.disabled = true;
+    } else {
+      inputArray[j].nextElementSibling.innerHTML = "";
+      order.disabled = false;
+    }
+  });
+}
+
+// On applique la dernière fonction à l'ensemble des inputs
+for (var j = 0; j < inputArray.length; j++) {
+  inputListener(j);
+}
+
+// Le mail nécessite un regex différent
+
+email.addEventListener("change", () => {
+  if (formRegexEmail.test(email.value) == false) {
+    emailErrorMsg.innerHTML = "Ceci n'est pas un email valide";
+    order.disabled = true;
+  } else {
+    emailErrorMsg.innerHTML = "";
+    order.disabled = false;
+  }
+});
+
+// Préparation de la commande
+
+function Contact(f, l, a, c, e) {
+  this.firstName = f.value;
+  this.lastName = l.value;
+  this.address = a.value;
+  this.city = c.value;
+  this.email = e.value;
+}
+
+function Products(a) {
+  this.products = a;
+}
+
+// let contact = {
+//   firstName: firstName.value,
+//   lastName: lastName.value,
+//   address: address.value,
+//   city: city.value,
+//   email: email.value,
+// };
+let utilisateur = "";
+let products = "";
+let jsonBody = "";
+
+function envoyer() {
+  fetch("http://localhost:3000/api/products", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify(jsonBody),
+  });
+  console.log(jsonBody);
+}
+
+order.addEventListener("click", (e) => {
+  e.preventDefault();
+  utilisateur = new Contact(firstName, lastName, address, city, email);
+  products = new Products(productArray);
+  jsonBody = [utilisateur, products];
+  console.log(utilisateur);
+  console.log(products);
+  console.log(jsonBody);
+  envoyer();
+});

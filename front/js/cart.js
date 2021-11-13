@@ -1,5 +1,7 @@
 const cartItems = document.getElementById("cart__items");
 
+let url = new URL(window.location.href);
+
 // Fonction pour créer le corps de l'article dans la liste comme présenté dans l'HTML
 function cartArticle(kanaps) {
   for (var i = 0; i < kanaps.length; i++) {
@@ -101,185 +103,208 @@ if (localStorage.getObj("products") !== null) {
   productArray = localStorage.getObj("products");
 }
 
-// Intégration de la liste
+// Via l'URL, on s'assure que cette partie du script ne s'applique que sur la page panier
+if (url == "http://127.0.0.1:5500/front/html/cart.html") {
+  // Intégration de la liste
+  cartArticle(productArray);
 
-cartArticle(productArray);
+  // Les totaux
 
-// Les totaux
+  const HTMLQuantity = document.getElementById("totalQuantity");
+  const HTMLPrice = document.getElementById("totalPrice");
 
-const HTMLQuantity = document.getElementById("totalQuantity");
-const HTMLPrice = document.getElementById("totalPrice");
+  let totalQuantity = 0;
+  let totalPrice = 0;
+  function total() {
+    productArray.forEach(function (v) {
+      let qteCart = parseInt(v.quantity, 10);
+      let priceCart = parseInt(v.price, 10);
+      totalQuantity += qteCart;
+      totalPrice += qteCart * priceCart;
+    });
+    HTMLQuantity.innerHTML = totalQuantity;
+    HTMLPrice.innerHTML = totalPrice;
+  }
 
-let totalQuantity = 0;
-let totalPrice = 0;
-function total() {
-  productArray.forEach(function (v) {
-    let qteCart = parseInt(v.quantity, 10);
-    let priceCart = parseInt(v.price, 10);
-    totalQuantity += qteCart;
-    totalPrice += qteCart * priceCart;
-  });
-  HTMLQuantity.innerHTML = totalQuantity;
-  HTMLPrice.innerHTML = totalPrice;
-}
-
-total();
-
-function updatePrice() {
-  totalQuantity = 0;
-  totalPrice = 0;
   total();
-}
 
-// Pouvoir modifier la quantité depuis le panier
+  function updatePrice() {
+    totalQuantity = 0;
+    totalPrice = 0;
+    total();
+  }
 
-// Création d'un array des éléments de la liste en fonction de leur index
+  // Pouvoir modifier la quantité depuis le panier
 
-let itemsQuantity = document.getElementsByClassName("itemQuantity");
-let itemsQuantityArray = Array.from(itemsQuantity);
-//
+  // Création d'un array des éléments de la liste en fonction de leur index
 
-// Mise à jour info panier via leur index
-function infoPanier(i) {
-  itemsQuantityArray[i].addEventListener("change", () => {
-    productArray[i].quantity = itemsQuantityArray[i].value;
-    localStorage.setObj("products", productArray);
-    updatePrice();
-  });
-}
+  let itemsQuantity = document.getElementsByClassName("itemQuantity");
+  let itemsQuantityArray = Array.from(itemsQuantity);
+  //
 
-for (var i = 0; i < itemsQuantityArray.length; i++) {
-  infoPanier(i);
-}
+  // Mise à jour info panier via leur index
+  function infoPanier(i) {
+    itemsQuantityArray[i].addEventListener("change", () => {
+      productArray[i].quantity = itemsQuantityArray[i].value;
+      localStorage.setObj("products", productArray);
+      updatePrice();
+    });
+  }
 
-// Bouton Supprimer
+  for (var i = 0; i < itemsQuantityArray.length; i++) {
+    infoPanier(i);
+  }
 
-let supprBtn = document.getElementsByClassName("deleteItem");
-console.log(supprBtn);
-let supprBtnArray = Array.from(supprBtn);
+  // Bouton Supprimer
 
-function suppr(i) {
-  supprBtnArray[i].addEventListener("click", () => {
-    // Mise à jour local storage
-    productArray.splice(i, 1);
-    localStorage.setObj("products", productArray);
-    // Mise à jour du total
-    updatePrice();
-    // Suppression de l'article contenant le produit
-    supprBtn[i].closest("article").remove();
-  });
-}
+  let supprBtn = document.getElementsByClassName("deleteItem");
+  console.log(supprBtn);
+  let supprBtnArray = Array.from(supprBtn);
 
-for (var i = 0; i < supprBtnArray.length; i++) {
-  suppr(i);
-}
+  function suppr(i) {
+    supprBtnArray[i].addEventListener("click", () => {
+      // Mise à jour local storage
+      productArray.splice(i, 1);
+      localStorage.setObj("products", productArray);
+      // Mise à jour du total
+      updatePrice();
+      // Suppression de l'article contenant le produit
+      supprBtn[i].closest("article").remove();
+    });
+  }
 
-// Récupération des éléments du formulaire
+  for (var i = 0; i < supprBtnArray.length; i++) {
+    suppr(i);
+  }
 
-const firstName = document.getElementById("firstName");
+  // Récupération des éléments du formulaire
 
-const lastName = document.getElementById("lastName");
+  const firstName = document.getElementById("firstName");
 
-const address = document.getElementById("address");
+  const lastName = document.getElementById("lastName");
 
-const city = document.getElementById("city");
+  const address = document.getElementById("address");
 
-const email = document.getElementById("email");
-const emailErrorMsg = document.getElementById("emailErrorMsg");
+  const city = document.getElementById("city");
 
-const order = document.getElementById("order");
+  const email = document.getElementById("email");
+  const emailErrorMsg = document.getElementById("emailErrorMsg");
 
-// Règles regex
+  const order = document.getElementById("order");
 
-let formRegex = /^[\w-]/g;
+  // Règles regex
 
-let formRegexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
+  let formRegex = /^[\w-]/g;
 
-// On récupère les inputs du formulaire
-let inputHTMLCollection = document.getElementsByTagName("input");
+  let formRegexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
 
-// On retire les deux derniers qui sont le mail (gestion différente) et le bouton de validation
-let inputArray = Array.from(inputHTMLCollection);
-inputArray.splice(4, 2);
+  // On récupère les inputs du formulaire
+  let inputHTMLCollection = document.getElementsByTagName("input");
 
-// Si erreur de saisie, on le notifie
+  // On retire les deux derniers qui sont le mail (gestion différente) et le bouton de validation
+  let inputArray = Array.from(inputHTMLCollection);
+  inputArray.splice(4, 2);
 
-function inputListener(j) {
-  inputArray[j].addEventListener("change", () => {
-    console.log(inputArray[j].value);
-    console.log(formRegex.test(inputArray[j].value));
-    if (formRegex.test(inputArray[j].value)) {
-      inputArray[j].nextElementSibling.innerHTML =
-        "Vous ne pouvez utiliser que des lettres";
+  // Si erreur de saisie, on le notifie
+
+  function inputListener(j) {
+    inputArray[j].addEventListener("change", () => {
+      console.log(inputArray[j].value);
+      console.log(formRegex.test(inputArray[j].value));
+      if (formRegex.test(inputArray[j].value)) {
+        inputArray[j].nextElementSibling.innerHTML =
+          "Vous ne pouvez utiliser que des lettres";
+        order.disabled = true;
+      } else {
+        inputArray[j].nextElementSibling.innerHTML = "";
+        order.disabled = false;
+      }
+    });
+  }
+
+  // On applique la dernière fonction à l'ensemble des inputs
+  for (var j = 0; j < inputArray.length; j++) {
+    inputListener(j);
+  }
+
+  // Le mail nécessite un regex différent
+
+  email.addEventListener("change", () => {
+    if (formRegexEmail.test(email.value) == false) {
+      emailErrorMsg.innerHTML = "Ceci n'est pas un email valide";
       order.disabled = true;
     } else {
-      inputArray[j].nextElementSibling.innerHTML = "";
+      emailErrorMsg.innerHTML = "";
       order.disabled = false;
     }
   });
-}
 
-// On applique la dernière fonction à l'ensemble des inputs
-for (var j = 0; j < inputArray.length; j++) {
-  inputListener(j);
-}
+  // Préparation de la commande
 
-// Le mail nécessite un regex différent
+  // Génération à venir du tableau des produits
 
-email.addEventListener("change", () => {
-  if (formRegexEmail.test(email.value) == false) {
-    emailErrorMsg.innerHTML = "Ceci n'est pas un email valide";
-    order.disabled = true;
-  } else {
-    emailErrorMsg.innerHTML = "";
-    order.disabled = false;
+  let products = [];
+  function productsOrdered() {
+    for (let i = 0; i < productArray.length; i++) {
+      products.push(productArray[i].id);
+    }
   }
-});
 
-// Préparation de la commande
+  // Génération de la fiche de contact
+  function Request(a, b) {
+    this.contact = a;
+    this.products = b;
+  }
 
-function Contact(f, l, a, c, e) {
-  this.firstName = f.value;
-  this.lastName = l.value;
-  this.address = a.value;
-  this.city = c.value;
-  this.email = e.value;
-}
+  function Contact(f, l, a, c, e) {
+    this.firstName = f.value;
+    this.lastName = l.value;
+    this.address = a.value;
+    this.city = c.value;
+    this.email = e.value;
+  }
 
-function Products(a) {
-  this.products = a;
-}
+  let utilisateur = "";
+  let jsonBody = "";
 
-// let contact = {
-//   firstName: firstName.value,
-//   lastName: lastName.value,
-//   address: address.value,
-//   city: city.value,
-//   email: email.value,
-// };
-let utilisateur = "";
-let products = "";
-let jsonBody = "";
+  function envoyer() {
+    fetch("http://localhost:3000/api/products/order", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(jsonBody),
+    })
+      .then(function (res) {
+        if (res.ok) {
+          return res.json();
+        }
+      })
+      // Transfert vers page de confirmation
+      .then(function (a) {
+        document.location.href = "./confirmation.html?orderId=" + a.orderId;
+      });
+  }
 
-function envoyer() {
-  fetch("http://localhost:3000/api/products", {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-type": "application/json",
-    },
-    body: JSON.stringify(jsonBody),
+  order.addEventListener("click", (e) => {
+    e.preventDefault();
+    utilisateur = new Contact(firstName, lastName, address, city, email);
+    productsOrdered();
+    jsonBody = new Request(utilisateur, products);
+    console.log(jsonBody);
+    envoyer();
   });
-  console.log(jsonBody);
 }
 
-order.addEventListener("click", (e) => {
-  e.preventDefault();
-  utilisateur = new Contact(firstName, lastName, address, city, email);
-  products = new Products(productArray);
-  jsonBody = [utilisateur, products];
-  console.log(utilisateur);
-  console.log(products);
-  console.log(jsonBody);
-  envoyer();
-});
+// Insertion du numéro de commande
+
+let urlString = url.toString();
+
+if (
+  urlString.startsWith("http://127.0.0.1:5500/front/html/confirmation.html")
+) {
+  let orderIdText = document.getElementById("orderId");
+  orderId = url.searchParams.get("orderId");
+  orderIdText.innerHTML = orderId;
+}

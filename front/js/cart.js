@@ -1,6 +1,17 @@
 const cartItems = document.getElementById("cart__items");
 
 let url = new URL(window.location.href);
+let productArray = [];
+
+//Methodes Traitement Information Storage
+Storage.prototype.setObj = function (key, value) {
+  this.setItem(key, JSON.stringify(value));
+};
+
+Storage.prototype.getObj = function (key) {
+  var value = this.getItem(key);
+  return value && JSON.parse(value);
+};
 
 // Fonction pour créer le corps de l'article dans la liste comme présenté dans l'HTML
 function cartArticle(kanaps) {
@@ -86,18 +97,7 @@ function cartArticle(kanaps) {
   }
 }
 
-//Methodes Traitement Information Storage
-Storage.prototype.setObj = function (key, value) {
-  this.setItem(key, JSON.stringify(value));
-};
-
-Storage.prototype.getObj = function (key) {
-  var value = this.getItem(key);
-  return value && JSON.parse(value);
-};
-
 // Récupération des données du local storage et stockage dans la variable productArray
-let productArray = [];
 
 if (localStorage.getObj("products") !== null) {
   productArray = localStorage.getObj("products");
@@ -109,7 +109,6 @@ if (url == "http://127.0.0.1:5500/front/html/cart.html") {
   cartArticle(productArray);
 
   // Les totaux
-
   const HTMLQuantity = document.getElementById("totalQuantity");
   const HTMLPrice = document.getElementById("totalPrice");
 
@@ -145,9 +144,15 @@ if (url == "http://127.0.0.1:5500/front/html/cart.html") {
   // Mise à jour info panier via leur index
   function infoPanier(i) {
     itemsQuantityArray[i].addEventListener("change", () => {
-      productArray[i].quantity = itemsQuantityArray[i].value;
-      localStorage.setObj("products", productArray);
-      updatePrice();
+      if (itemsQuantityArray[i].value == 0) {
+        alert(
+          "Veuillez cliquer directement sur supprimer ou utilisez uniquement des chiffres pour les quantités"
+        );
+      } else {
+        productArray[i].quantity = itemsQuantityArray[i].value;
+        localStorage.setObj("products", productArray);
+        updatePrice();
+      }
     });
   }
 
@@ -194,30 +199,45 @@ if (url == "http://127.0.0.1:5500/front/html/cart.html") {
 
   // Règles regex
 
-  let formRegex = /^[\w-]/g;
+  let formRegexName = /^[a-zA-Z ,.'-]*$/i;
+
+  let formRegexAdress = /^[a-zA-Z0-9\s,'-]*$/;
 
   let formRegexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
 
   // On récupère les inputs du formulaire
-  let inputHTMLCollection = document.getElementsByTagName("input");
+  let inputNodeList = document.querySelectorAll("div.cart__order div > input");
+  console.log(inputNodeList);
 
   // On retire les deux derniers qui sont le mail (gestion différente) et le bouton de validation
-  let inputArray = Array.from(inputHTMLCollection);
+  let inputArray = Array.from(inputNodeList);
+  console.log(inputArray);
   inputArray.splice(4, 2);
 
   // Si erreur de saisie, on le notifie
 
   function inputListener(j) {
     inputArray[j].addEventListener("change", () => {
-      console.log(inputArray[j].value);
-      console.log(formRegex.test(inputArray[j].value));
-      if (formRegex.test(inputArray[j].value)) {
-        inputArray[j].nextElementSibling.innerHTML =
-          "Vous ne pouvez utiliser que des lettres";
-        order.disabled = true;
+      // On applique un premier regex pour nom et prénom
+      if (j <= 1) {
+        if (formRegexName.test(inputArray[j].value) == false) {
+          inputArray[j].nextElementSibling.innerHTML =
+            "Vous ne pouvez utiliser que des lettres";
+          order.disabled = true;
+        } else {
+          inputArray[j].nextElementSibling.innerHTML = "";
+          order.disabled = false;
+        }
       } else {
-        inputArray[j].nextElementSibling.innerHTML = "";
-        order.disabled = false;
+        // Un autre pour les adresses en tolérant les chiffres
+        if (formRegexAdress.test(inputArray[j].value) == false) {
+          inputArray[j].nextElementSibling.innerHTML =
+            "Ceci n'est pas une adresse valide";
+          order.disabled = true;
+        } else {
+          inputArray[j].nextElementSibling.innerHTML = "";
+          order.disabled = false;
+        }
       }
     });
   }
@@ -250,7 +270,7 @@ if (url == "http://127.0.0.1:5500/front/html/cart.html") {
     }
   }
 
-  // Génération de la fiche de contact
+  // Génération de la fiche de contact pour envoi API
   function Request(a, b) {
     this.contact = a;
     this.products = b;
@@ -284,16 +304,22 @@ if (url == "http://127.0.0.1:5500/front/html/cart.html") {
       // Transfert vers page de confirmation
       .then(function (a) {
         document.location.href = "./confirmation.html?orderId=" + a.orderId;
-      });
+      })
+      .catch((err) => console.log("Oh no", err));
   }
 
   order.addEventListener("click", (e) => {
-    e.preventDefault();
-    utilisateur = new Contact(firstName, lastName, address, city, email);
-    productsOrdered();
-    jsonBody = new Request(utilisateur, products);
-    console.log(jsonBody);
-    envoyer();
+    if (productArray == 0) {
+      alert("Merci de compléter votre panier pour passer votre commande");
+    } else {
+      e.preventDefault();
+      utilisateur = new Contact(firstName, lastName, address, city, email);
+      productsOrdered();
+      jsonBody = new Request(utilisateur, products);
+      console.log(jsonBody);
+      envoyer();
+      localStorage.clear();
+    }
   });
 }
 

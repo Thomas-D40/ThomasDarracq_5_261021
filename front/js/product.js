@@ -21,15 +21,12 @@ let id = url.searchParams.get("id");
 
 // Affichage produit
 
-function cartContent(kanaps) {
+function pageContent(kanaps) {
   for (let i = 0; i < kanaps.length; i++) {
     if (kanaps[i]._id == id) {
-      console.log(kanaps[i]._id);
       title.innerHTML = kanaps[i].name;
       price.innerHTML = kanaps[i].price;
       description.innerHTML = kanaps[i].description;
-
-      console.log(kanaps[i].colors);
 
       let options = [];
       for (let j = 0; j < kanaps[i].colors.length; j++) {
@@ -54,13 +51,11 @@ const retrieveData = () => {
   fetch("http://localhost:3000/api/products")
     .then(function (res) {
       if (res.ok) {
-        console.log(res.json);
         return res.json();
       }
     })
-    .then((data) => cartContent(data))
+    .then((data) => pageContent(data))
     .catch((err) => console.log("Oh no", err));
-  // Sur la base de l'API, on recherche le produit correspondant à la page pour injecter les informations dans le HTML
 };
 
 retrieveData();
@@ -79,26 +74,6 @@ Storage.prototype.getObj = function (key) {
 };
 
 //Ajout au panier
-
-function updateCart(v) {
-  // Si déjà présent, on passe isNew en faux et on procède au changement de quantité
-  if (v.id == id && v.color == color) {
-    isNew = false;
-    // Qte et v.quantity étant des strings, on les transforme en nombre pour procéder à l'addition
-    console.log(typeof qte);
-    let qteCart = parseInt(v.quantity, 10);
-    let qteAdded = parseInt(qte, 10);
-    qteCart += qteAdded;
-
-    //On mets à jour le prix total sur cet article
-    total = qteCart * parseInt(prix, 10);
-    console.log(typeof v.total);
-
-    // Réintégration nouvelle donnée dans v.quantity et v.total sous la forme de string pour dépôt dans le LocalStorage
-    v.total = JSON.stringify(total);
-    v.quantity = JSON.stringify(qteCart);
-  }
-}
 
 addToCart.addEventListener("click", function (e) {
   e.preventDefault();
@@ -129,7 +104,6 @@ addToCart.addEventListener("click", function (e) {
   ///////////////// STORAGE
 
   // La quantité doit nécessairement être supérieure à 0 pour être ajouté au panier
-
   if (qte > 0) {
     if (localStorage.getObj("products") !== null) {
       productArray = localStorage.getObj("products");

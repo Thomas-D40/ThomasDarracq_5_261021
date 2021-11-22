@@ -207,11 +207,9 @@ if (url == "http://127.0.0.1:5500/front/html/cart.html") {
 
   // On récupère les inputs du formulaire
   let inputNodeList = document.querySelectorAll("div.cart__order div > input");
-  console.log(inputNodeList);
 
   // On retire les deux derniers qui sont le mail (gestion différente) et le bouton de validation
   let inputArray = Array.from(inputNodeList);
-  console.log(inputArray);
   inputArray.splice(4, 2);
 
   // Si erreur de saisie, on le notifie
@@ -316,7 +314,6 @@ if (url == "http://127.0.0.1:5500/front/html/cart.html") {
       utilisateur = new Contact(firstName, lastName, address, city, email);
       productsOrdered();
       jsonBody = new Request(utilisateur, products);
-      console.log(jsonBody);
       envoyer();
       localStorage.clear();
     }

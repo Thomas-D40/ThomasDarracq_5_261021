@@ -6,26 +6,29 @@ fetch("http://localhost:3000/api/products")
       return res.json();
     }
   })
-
   // Import des informations des articles + injection dans HTML
-  .then(function (kanaps) {
-    for (var i = 0; i < kanaps.length; i++) {
-      var kanapLink = document.createElement("a");
-      var kanapArticle = document.createElement("article");
-      var kanapPicture = document.createElement("img");
-      var kanapTitle = document.createElement("h3");
-      var kanapDescription = document.createElement("p");
+  .then((data) => cartContent(data))
+  .catch((err) => console.log("Oh no", err));
 
-      kanapLink.href = "./product.html?id=" + kanaps[i]._id;
-      kanapPicture.src = kanaps[i].imageUrl;
-      kanapTitle.innerHTML = kanaps[i].name;
-      kanapDescription.innerHTML = kanaps[i].description;
+// Création des cartes des produits
+function cartContent(kanaps) {
+  for (var i = 0; i < kanaps.length; i++) {
+    var kanapLink = document.createElement("a");
+    var kanapArticle = document.createElement("article");
+    var kanapPicture = document.createElement("img");
+    var kanapTitle = document.createElement("h3");
+    var kanapDescription = document.createElement("p");
 
-      kanapLink.appendChild(kanapArticle);
-      kanapArticle.appendChild(kanapPicture);
-      kanapArticle.appendChild(kanapTitle);
-      kanapArticle.appendChild(kanapDescription);
+    kanapLink.href = "./product.html?id=" + kanaps[i]._id;
+    kanapPicture.src = kanaps[i].imageUrl;
+    kanapTitle.innerHTML = kanaps[i].name;
+    kanapDescription.innerHTML = kanaps[i].description;
 
-      items.appendChild(kanapLink);
-    }
-  });
+    kanapLink.appendChild(kanapArticle);
+    kanapArticle.appendChild(kanapPicture);
+    kanapArticle.appendChild(kanapTitle);
+    kanapArticle.appendChild(kanapDescription);
+
+    items.appendChild(kanapLink);
+  }
+}
